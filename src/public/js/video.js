@@ -77,6 +77,11 @@ cameraButton.addEventListener("click", () => {
 });
 cameraSelect.addEventListener("input", () => {
     getMedia(cameraSelect.value);
+    if(myPeerConnection) {
+        const videoTrack = myStream.getVideoTracks()[0];
+        const videoSender = myPeerConnection.getSenders().find(sender => sender.track.kind === "video");
+        videoSender.replaceTrack(videoTrack);
+    }
 });
 
 
@@ -119,10 +124,33 @@ socket.on("answer", answer => {
     myPeerConnection.setRemoteDescription(answer);
 });
 
+socket.on("ice", ice => {
+    myPeerConnection.addIceCandidate(ice);
+});
+
 // RTC Code
 
 function makeConnection() {
-    myPeerConnection = new RTCPeerConnection();
+    myPeerConnection = new RTCPeerConnection({
+        iceServers: [
+            {
+                urls: [
+                    "stun:stun.l.google.com:19302",
+                    "stun:stun1.l.google.com:19302",
+                    "stun:stun2.l.google.com:19302",
+                    "stun:stun3.l.google.com:19302",
+                    "stun:stun4.l.google.com:19302"
+                ]
+            }
+        ]
+    });
+    myPeerConnection.addEventListener("icecandidate", (data) => {
+        socket.emit("ice", data.candidate, roomName);
+    });
+    myPeerConnection.addEventListener("addstream", (data) => {
+        const peerFace = document.getElementById("peerFace");
+        peerFace.srcObject = data.stream;
+    });
     myStream.getTracks().forEach(track => myPeerConnection.addTrack(track, myStream));
 }
 
