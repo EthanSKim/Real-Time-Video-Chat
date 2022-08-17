@@ -8,7 +8,7 @@ const app = express();
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 app.use("/public", express.static(__dirname + "/public"));
-app.get("/home", (req, res) => res.render("home"));
+app.get("/", (req, res) => res.render("home"));
 app.get("/video", (req, res) => res.render("video"));
 app.get("/*", (req, res) => res.redirect("/"));
 
@@ -52,7 +52,7 @@ io.on("connection", socket => {
         io.sockets.emit("room_change", publicRooms());
     })
     socket.on("new_message", (msg, room, done) => {
-        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`, false);
         done();
     });
     socket.on("nickname", (nickname, done) => {socket["nickname"] = nickname; done();});

@@ -88,10 +88,14 @@ cameraSelect.addEventListener("input", () => {
 //Welcome Form
 const welcome = document.getElementById("welcome");
 welcomeForm = welcome.querySelector("form");
+const header = document.querySelector("header");
 
 async function startMedia() {
     welcome.hidden = true;
+    header.hidden = true;
     call.hidden = false;
+    call.style.display = "flex";
+    call.style.justifyContent = "space-evenly";
     await getMedia();
     makeConnection();
 }
